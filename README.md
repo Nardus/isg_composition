@@ -1,6 +1,6 @@
 # Prediction of interferon stimulated and repressed genes using sequence composition
 
-Code for the machine learning component of Shaw, Rhin, Mollentze, *et al.* (2021) "The ‘antiviral state’ has shaped the CpG composition of the vertebrate interferome". Raw data for this publication are available from ___, and will be downloaded automatically by this analysis pipeline. 
+Code for the machine learning component of Shaw, Rihn, Mollentze, *et al.* (2021) "The ‘antiviral state’ has shaped the CpG composition of the vertebrate interferome". Raw data for this publication are available from ___, and will be downloaded automatically by this analysis pipeline. 
 
 The aim of this part of the analysis was to investigate to what extent interferon-stimulated genes, interferon-repressed genes, and remaining genes are compositionally distinct, and to identify the most important compositional features allowing them to be distinguished. 
 
@@ -45,7 +45,7 @@ Run `make help` for further details.
    │
    ├─Scripts/ ...................................... Main pipeline scripts
    │
-   ├─Makefile ...................................... Record of workflow and dependencies between files
+   └─Makefile ...................................... Record of workflow and dependencies between files
 ```
 
 ### Composition data
