@@ -156,6 +156,28 @@ list(A = p1$data, B = p2$data, C = p3$data) %>%
 	write_excel_csv(file.path('Output', 'AllHostsCombined', 'Plots', 'OverallAccuracy_Combined.csv'))
 
 
+raw_preds.ISGvsIRG <- fit.ISGvsIRG$pred %>% 
+	left_join(inputData.ISGvsIRG, by = 'rowIndex') %>% 
+	separate(Resample, into = c('Fold', 'Replicate'), sep = '\\.') %>% 
+	select(Gene, Species = Host, Observed = obs, Fold, Replicate, Prediction = pred) %>% 
+	arrange(Fold, Replicate, Species, Gene)
+
+raw_preds.StimulatedVsRandom <- fit.StimulatedVsRandom$pred %>% 
+	left_join(inputData.StimulatedVsRandom, by = 'rowIndex') %>% 
+	separate(Resample, into = c('Fold', 'Replicate'), sep = '\\.') %>% 
+	select(Gene, Species = Host, Observed = obs, Fold, Replicate, Prediction = pred) %>% 
+	arrange(Fold, Replicate, Species, Gene)
+
+raw_preds.RepressedVsRandom <- fit.RepressedVsRandom$pred %>% 
+	left_join(inputData.RepressedVsRandom, by = 'rowIndex') %>% 
+	separate(Resample, into = c('Fold', 'Replicate'), sep = '\\.') %>% 
+	select(Gene, Species = Host, Observed = obs, Fold, Replicate, Prediction = pred) %>% 
+	arrange(Fold, Replicate, Species, Gene)
+
+write_excel_csv(raw_preds.ISGvsIRG, file.path('Output', 'AllHostsCombined', 'Plots', 'OverallAccuracy_RawPredictions_ISGvsIRG.csv'))
+write_excel_csv(raw_preds.StimulatedVsRandom, file.path('Output', 'AllHostsCombined', 'Plots', 'OverallAccuracy_RawPredictions_StimulatedVsRandom.csv'))
+write_excel_csv(raw_preds.RepressedVsRandom, file.path('Output', 'AllHostsCombined', 'Plots', 'OverallAccuracy_RawPredictions_RepressedVsRandom.csv'))
+
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # ---- Accuracy by gene ---------------------------------------------------------------------------
@@ -347,9 +369,26 @@ save_plot2(p_combined, 'ImportanceAcrossSpp_Combined', height = 3.5, width = 7.5
 #save_plot2(plot_grid(shared_legend), 'ImportanceAcrossSpp_Legend', height = 3.5, width = 7.5/3.5*0.5)
 
 
+# Save raw data from plots
+importance.ISGvsIRG <- varImpShap.ISGvsIRG %>% 
+	mutate(HostContribution = if_else(is.na(HostContribution), 0, HostContribution)) %>% 
+	arrange(-HostContribution) %>% 
+	select(Species = Host, Feature, FeatureImportance_AllSpecies = OverallMeanSHAP, FeatureImportance_ThisSpecies = HostMeanSHAP, RelativeImportance_ThisSpecies = HostContribution)
 
-# TODO: need a better way to show that all hosts have similar explanations
-# Perhaps cluster by explanation, the show that they do not cluster by host?
+importance.StimulatedVsRandom <- varImpShap.StimulatedVsRandom %>% 
+	mutate(HostContribution = if_else(is.na(HostContribution), 0, HostContribution)) %>% 
+	arrange(-HostContribution) %>% 
+	select(Species = Host, Feature, FeatureImportance_AllSpecies = OverallMeanSHAP, FeatureImportance_ThisSpecies = HostMeanSHAP, RelativeImportance_ThisSpecies = HostContribution)
+
+importance.RepressedVsRandom <- varImpShap.RepressedVsRandom %>% 
+	mutate(HostContribution = if_else(is.na(HostContribution), 0, HostContribution)) %>% 
+	arrange(-HostContribution) %>% 
+	select(Species = Host, Feature, FeatureImportance_AllSpecies = OverallMeanSHAP, FeatureImportance_ThisSpecies = HostMeanSHAP, RelativeImportance_ThisSpecies = HostContribution)
+
+
+write_excel_csv(importance.ISGvsIRG, file.path('Output', 'AllHostsCombined', 'Plots', 'Importance_ISGvsIRG.csv'))
+write_excel_csv(importance.StimulatedVsRandom, file.path('Output', 'AllHostsCombined', 'Plots', 'Importance_StimulatedVsRandom.csv'))
+write_excel_csv(importance.RepressedVsRandom, file.path('Output', 'AllHostsCombined', 'Plots', 'Importance_RepressedVsRandom.csv'))
 
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
