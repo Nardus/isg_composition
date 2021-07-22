@@ -187,12 +187,12 @@ ko_consistent %>%
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # random / IRGs (no guide) / IRGs (KO)
 # TODO: unclear where random genes should come from (can we really assume the original set are all still random here?)
-koexp_control_data <- read_excel("Data/Other_Experiments/No Guide Clones and Zap clones Top 50s/EdgeRCas9ClonesIFNome_withFDR_forPrism.xlsx",
+koexp_control_data <- read_excel("Data/Other_Experiments/EdgeRCas9ClonesIFNome_withFDR_forPrism.xlsx",
 																 sheet = "EdgeRCas9ClonesIFNome_withFDR_p") %>% 
 	mutate(Treatment = "no guide") %>% 
 	select(.data$EnsemblID, .data$Treatment, label = .data$Rank)
 
-koexp_ko_data <- read_excel("Data/Other_Experiments/No Guide Clones and Zap clones Top 50s/EdgeR_KOClonesIFNome_withFDR_forPrisim.xlsx",
+koexp_ko_data <- read_excel("Data/Other_Experiments/EdgeR_KOClonesIFNome_withFDR_forPrisim.xlsx",
 														sheet = "EdgeR_KOClonesIFNome_withFDR") %>% 
 	mutate(Treatment = "KO") %>% 
 	filter(!is.na(.data$EnsemblID) & .data$EnsemblID != "NA") %>% 
@@ -240,8 +240,7 @@ ko_experiment %>%
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # ---- Exogenous ZAP - all genes -----------------------------------------------------------------
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-exo_zap_genes <- read_xlsx("Data/Other_Experiments/figure_data.xlsx", 
-																	 sheet = "4F Top50-Up-Down-Random") %>% 
+exo_zap_genes <- read.csv("Data/Other_Experiments/Fig_5I_Top50-Up-Down-Random.csv") %>% 
 	select(Gene = .data$Gene_Name, .data$EnsemblID, Category = .data$Rank) %>% 
 	bind_rows(holdout_random) %>% 
 	mutate(Category = factor(.data$Category, levels = c("TOP50 UP", "Random50", "Holdout Random", "TOP50 DOWN"))) %>% 

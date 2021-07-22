@@ -43,6 +43,9 @@ packrat/src/
 Scripts/extra/*
 
 # Output directories
-CalculatedData/*
 Data/*
+!Data/ISG_identities.csv
+!Data/consistent_irgs.csv
+
+CalculatedData/*
 Output/*

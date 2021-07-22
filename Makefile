@@ -71,9 +71,9 @@ MOUSE_HOLDOUT_DATA = Data/MouseHoldout/mouse_holdout_genes.csv \
 
 EXPERIMENT_DATA = Data/Other_Experiments/consistent_irgs.csv \
 				  Data/Other_Experiments/Random100_nonDE_CPM1_A549_typeI_4h.csv \
-				  Data/Other_Experiments/No Guide Clones and Zap clones Top 50s/EdgeRCas9ClonesIFNome_withFDR_forPrism.xlsx \
-				  Data/Other_Experiments/No Guide Clones and Zap clones Top 50s/EdgeR_KOClonesIFNome_withFDR_forPrisim.xlsx \
-				  Data/Other_Experiments/figure_data.xlsx \
+				  Data/Other_Experiments/EdgeRCas9ClonesIFNome_withFDR_forPrism.xlsx \
+				  Data/Other_Experiments/EdgeR_KOClonesIFNome_withFDR_forPrisim.xlsx \
+				  Data/Other_Experiments/Fig_5I_Top50-Up-Down-Random.csv \
 				  Data/ISG_identities.csv \
 				  Data/SelectedGenes/human_Top50_Formatted.csv
 
@@ -81,8 +81,10 @@ EXPERIMENT_DATA = Data/Other_Experiments/consistent_irgs.csv \
 # ---- Commands -----------------------------------------------------------------------------------
 ## SHORTCUTS:
 # Main analysis
-.PHONY: all, prepare, train, predict, plot
-all: prepare train predict plot
+.PHONY: all, download_data, prepare, train, predict, plot
+all: train predict plot  # Not including "download_data" and "prepare" here: files should extracted/processed as needed for training instead
+
+download_data: $(IDENTITY_DATA) $(FEATURE_DATA) $(MOUSE_HOLDOUT_DATA) $(EXPERIMENT_DATA)
 
 prepare: $(PREPARED_DATA_HOSTS) CalculatedData/InputData_AllHosts.rds
 
@@ -110,14 +112,92 @@ plot_additional: Output/Plots/OverallAccuracy_ISGvsIRG.pdf
 # Note: the '$*' below expands to the part of the filename that was matched
 #       by '%' in the rule, in this case the host name
 
+# Download and extract data
+Data/main_data.zip:
+	curl -L -o $@ --create-dirs http://researchdata.gla.ac.uk/1159/1/Data_1159.zip
+
+Data/other_data.zip:
+	curl -L -o $@ --create-dirs https://zenodo.org/record/5035607/files/rjorton/DinucISG-v1.0.0.zip
+
+# - Identity data (needs some renaming)
+HOST_CAPITALIZED = $(shell echo $* | awk '{ print toupper(substr($$0,1,1)) substr($$0,2) }')
+
+Data/SelectedGenes/%_Top50_Formatted.csv: Data/main_data.zip
+	mkdir -p $(@D)
+	unzip -p $< "ENLIGHTEN - Shaw, Rihn, Mollentze et al., 2021/Fig 2/Fig 2 data/${HOST_CAPITALIZED}_Top50_Formatted.csv" > $@
+
+Data/SelectedGenes/megabat_Top50_Formatted.csv: Data/main_data.zip
+	mkdir -p $(@D)
+	unzip -p $< "ENLIGHTEN - Shaw, Rihn, Mollentze et al., 2021/Fig 2/Fig 2 data/Fruit bat_Top50_Formatted.csv" > $@
+
+
+# - Part 1 feature files
+Data/Part1_Dinucs/%_cdna_new_dat_fpkm_dups.txt: Data/other_data.zip
+	mkdir -p $(@D)
+	unzip -p $< rjorton-DinucISG-d67e82b/DinucData/$*_cdna_new_dat_fpkm_dups.txt > $@
+
+Data/Part1_Dinucs/%_cds_new_dat_fpkm_dups.txt: Data/other_data.zip
+	mkdir -p $(@D)
+	unzip -p $< rjorton-DinucISG-d67e82b/DinucData/$*_cds_new_dat_fpkm_dups.txt > $@
+
+
+# - Part 2 feature files
+Data/Part2_Codons/%_cds_new_cpb_dat_dups.txt: Data/main_data.zip
+	mkdir -p $(@D)
+	unzip -p $< "ENLIGHTEN - Shaw, Rihn, Mollentze et al., 2021/Sequence Features/Enlighten_ISG_Zap/$*_cds_new_cpb_dat_dups.txt" > $@
+
+
+# - Mouse holdout data
+Data/MouseHoldout/mouse_holdout_genes.csv: Data/main_data.zip
+	mkdir -p $(@D)
+	unzip -p $< "ENLIGHTEN - Shaw, Rihn, Mollentze et al., 2021/Fig 1/Fig 1H/Murine genes.csv" > $@
+
+Data/MouseHoldout/mouse_cds.txt: Data/main_data.zip
+	mkdir -p $(@D)
+	unzip -p $< "ENLIGHTEN - Shaw, Rihn, Mollentze et al., 2021/Sequence Features/Enlighten_ISG_Zap/mouse_cds.txt" > $@
+
+Data/MouseHoldout/mouse_cds_cg.txt: Data/other_data.zip
+	mkdir -p $(@D)
+	unzip -p $< rjorton-DinucISG-d67e82b/DinucData/mouse_cds_cg.txt > $@
+
+Data/MouseHoldout/mouse_cdna_ncrna.txt: Data/other_data.zip
+	mkdir -p $(@D)
+	unzip -p $< rjorton-DinucISG-d67e82b/DinucData/mouse_cdna_ncrna.txt > $@
+
+
+# - Experiment data
+Data/Other_Experiments/consistent_irgs.csv: Data/consistent_irgs.csv
+	mkdir -p $(@D)
+	cp $< $@
+
+Data/Other_Experiments/Random100_nonDE_CPM1_A549_typeI_4h.csv: Data/main_data.zip
+	mkdir -p $(@D)
+	unzip -p $< "ENLIGHTEN - Shaw, Rihn, Mollentze et al., 2021/Fig 2/Fig 2 data/Random100_nonDE_CPM1_A549_typeI_4h.csv" > $@
+
+Data/Other_Experiments/EdgeRCas9ClonesIFNome_withFDR_forPrism.xlsx: Data/main_data.zip
+	mkdir -p $(@D)
+	unzip -p $< "ENLIGHTEN - Shaw, Rihn, Mollentze et al., 2021/Fig 4/Fig 4DE/Fig 4DE No Guide Interferomes.xlsx" > $@
+
+Data/Other_Experiments/EdgeR_KOClonesIFNome_withFDR_forPrisim.xlsx: Data/main_data.zip
+	mkdir -p $(@D)
+	unzip -p $< "ENLIGHTEN - Shaw, Rihn, Mollentze et al., 2021/Fig 4/Fig 4DE/Fig 4DE ZAP KO interferome.xlsx" > $@
+
+Data/Other_Experiments/Fig_5I_Top50-Up-Down-Random.csv: Data/main_data.zip
+	mkdir -p $(@D)
+	unzip -p $< "ENLIGHTEN - Shaw, Rihn, Mollentze et al., 2021/Fig 5/Fig 5I/Fig 5I Top50-Up-Down-Random.csv" > $@
+
+
+
 # Prepare data
 CalculatedData/InputData_AllHosts.rds: $(FEATURE_DATA) Data/ISG_identities.csv
+	mkdir -p $(@D)
 	Rscript --default-packages=methods,utils,stats ./Scripts/Prepare.R --host $(HOSTS)
 
 CalculatedData/InputData_%.rds: Data/Part1_Dinucs/%_cds_new_dat_fpkm_dups.txt \
 								Data/Part1_Dinucs/%_cdna_new_dat_fpkm_dups.txt \
 								Data/Part2_Codons/%_cds_new_cpb_dat_dups.txt \
 								Data/ISG_identities.csv
+	mkdir -p $(@D)
 	Rscript --default-packages=methods,utils,stats ./Scripts/Prepare.R --host $*
 
 
@@ -163,21 +243,21 @@ Output/AllHostsCombined/ISGvsIRG-Top50/Fit_ISGvsIRG-Top50_AllHosts.rds: Calculat
 	mv Output/ISGvsIRG-Top50/Fit_ISGvsIRG-Top50_AllHosts.rds $(@D)/
 	mv Output/ISGvsIRG-Top50/Data_ISGvsIRG-Top50_AllHosts.rds $(@D)/
 
-Output/AllHostsCombined/ISGvsRandom-Top50/Fit_ISGvsRandom-Top50_AllHosts.rds: CalculatedData/InputData_AllHosts.rds
+Output/AllHostsCombined/ISGvsRandom-Top50/Fit_ISGvsRandom-Top50_AllHosts.rds: CalculatedData/InputData_AllHosts.rds \
 																			  $(IDENTITY_DATA)
 	Rscript --default-packages=methods,utils,stats Scripts/Train.R --ISGvsRandom --Top50 --host AllHosts
 	mkdir -p Output/AllHostsCombined/ISGvsRandom-Top50
 	mv Output/ISGvsRandom-Top50/Fit_ISGvsRandom-Top50_AllHosts.rds $(@D)/
 	mv Output/ISGvsRandom-Top50/Data_ISGvsRandom-Top50_AllHosts.rds $(@D)/
 
-Output/AllHostsCombined/IRGvsRandom-Top50/Fit_IRGvsRandom-Top50_AllHosts.rds: CalculatedData/InputData_AllHosts.rds
+Output/AllHostsCombined/IRGvsRandom-Top50/Fit_IRGvsRandom-Top50_AllHosts.rds: CalculatedData/InputData_AllHosts.rds \
 																			  $(IDENTITY_DATA)
 	Rscript --default-packages=methods,utils,stats Scripts/Train.R --IRGvsRandom --Top50 --host AllHosts
 	mkdir -p Output/AllHostsCombined/IRGvsRandom-Top50
 	mv Output/IRGvsRandom-Top50/Fit_IRGvsRandom-Top50_AllHosts.rds $(@D)/
 	mv Output/IRGvsRandom-Top50/Data_IRGvsRandom-Top50_AllHosts.rds $(@D)/
 
-Output/AllHostsCombined/3Class-Top50/Fit_3Class-Top50_AllHosts.rds: CalculatedData/InputData_AllHosts.rds
+Output/AllHostsCombined/3Class-Top50/Fit_3Class-Top50_AllHosts.rds: CalculatedData/InputData_AllHosts.rds \
 																	$(IDENTITY_DATA)
 	Rscript --default-packages=methods,utils,stats Scripts/Train.R --Predict3Class --Top50 --host AllHosts
 	mkdir -p Output/AllHostsCombined/3Class-Top50

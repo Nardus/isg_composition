@@ -275,10 +275,10 @@ plot_overall_importance <- function(varimps, xlabel = 'Relative importance', yla
 	if (normalise) {
 		varimps <- varimps %>% 
 			group_by(Host) %>% 
-			mutate(RelativeImportance = MeanSHAP / max(MeanSHAP))  # Relative importance, to make values comparable across spp
+			mutate(RelativeImportance = HostMeanSHAP / max(HostMeanSHAP))  # Relative importance, to make values comparable across spp
 	} else {
 		varimps <- varimps %>% 
-			mutate(RelativeImportance = MeanSHAP)
+			mutate(RelativeImportance = HostMeanSHAP)
 	}
 	
 	
