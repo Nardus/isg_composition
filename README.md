@@ -58,7 +58,7 @@ Data will be downloaded as needed while running the pipeline, but can also be ob
 	- This folder contains the expression data and dinucleotide composition summaries for the **longest transcript** of each gene
   - Files named `[species]_cds_new_dat_fpkm_dups.txt` contains data for coding sequences only
   - Files named `[species]_cdna_new_dat_fpkm_dups.txt` contains the same calculations across the entire coding sequence
-  - Most files match cds/cdna datasets provided by [https://www.ensembl.org/info/data/ftp/index.html]
+  - Most files are derived from cds/cdna datasets provided by the [Ensembl FTP server](https://www.ensembl.org/info/data/ftp/index.html)
     - *Where [species] is replaced with 'biomart':* For humans only, contains **all** human genes, downloaded manually from Ensembl Biomart
 - In `Data/Part2_Codons/`:
   - Contains codon and codon-pair biases for the same transcripts as above
